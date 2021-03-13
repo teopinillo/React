@@ -47,6 +47,7 @@ in modern browsers*/
 */
 
 class Form extends React.Component {
+  
   //note 4
   userNameInput = React.createRef();
   handleSubmit = async (event) => {
@@ -57,12 +58,12 @@ class Form extends React.Component {
     event.preventDefault();
     //fetching the data
     const resp = await axios.get(`https://api.github.com/users/${this.userNameInput.current.value}`);
-    console.log (resp);
+    this.props.onSubmit(resp.data);
     //note 5
-    console.log(
-      this.userNameInput.current.value
-    );
+    console.log(this.userNameInput.current.value);
+    this.userNameInput.current.value = '';
   };
+
   render() {
     return (
       //note 1
@@ -95,16 +96,15 @@ class Form extends React.Component {
 class Form2 extends React.Component {
   //**6 */
   state = { userName: '' }
-  handleSubmit = (event) => {
+  handleSubmit = async (event) => {
     event.preventDefault();
     //fetching the data
-    axios.get(`https://api.github.com/users/${this.state.userName}`);
-    console.log(
-      this.state.userName
-    );
+    const resp = await axios.get(`https://api.github.com/users/${this.state.userName}`);
+    this.props.onSubmit (resp.data);
+    this.setState ( {userName : ''});   
   };
   render() {
-    return (      
+    return (
       <form onSubmit={this.handleSubmit} id="form2">
         <input type="text"
           value={this.state.userName}
@@ -133,12 +133,19 @@ class App extends React.Component {
     profiles: testData,
   };
 
+  addNewProfile = (profileData) => {
+    console.log('App', profileData);
+    this.setState(prevState => ({
+      profiles: [...prevState.profiles, profileData]
+    }));
+  };
+
   render() {
     return (
       <div>
         <div className="header">{this.props.title}</div>
-        <Form />
-        <Form2/>
+        <Form onSubmit={this.addNewProfile} />
+        <Form2 onSubmit={this.addNewProfile} />
         <CardList profiles={this.state.profiles} />
       </div>
     );
